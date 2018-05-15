@@ -22,7 +22,9 @@ class AdsController extends Controller{
     }
  
     public function getAds($id){
- 
+        
+
+        //ini dikerjakan Pakde
         $ads  = Ads::find($id);
         $ads->view_counter = $ads['view_counter']+1;
  
