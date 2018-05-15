@@ -29,7 +29,7 @@ class AdsController extends Controller{
         $ads->view_counter = $ads['view_counter']+1;
  
         $ads->save();
-
+            //tesss
         if ($ads) {
             # code...
             return response()->json([
