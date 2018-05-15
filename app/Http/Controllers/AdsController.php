@@ -103,5 +103,9 @@ class AdsController extends Controller{
  
         return response()->json($ads);
     }
+
+    //Pakde
+
+    //Pakpo
  
 }

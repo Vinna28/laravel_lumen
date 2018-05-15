@@ -26,3 +26,7 @@ $router->post('api/ads','AdsController@saveAds');
 $router->put('api/ads/{id}','AdsController@updateAds');
  
 $router->delete('api/ads/{id}','AdsController@deleteAds');
+
+//Pakde
+
+//Pakpo
