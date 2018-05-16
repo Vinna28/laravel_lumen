@@ -30,3 +30,6 @@ $router->delete('api/ads/{id}','AdsController@deleteAds');
 //Pakde
 
 //Pakpo
+$router->put('api/ads/approve/{id}','AdsController@approveAds');
+
+$router->put('api/ads/vc/{id}', 'AdsController@updateVcAds');

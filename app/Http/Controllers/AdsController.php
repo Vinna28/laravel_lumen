@@ -48,7 +48,9 @@ class AdsController extends Controller{
  
         $input = $request->all();
         // var_dump($input['title']);
-        // $ads = Ads::where('title', $input['title'])->first();
+
+
+
         // // var_dump(count($ads));
         // //if ads name exist, dont save and response 403
         // if ($ads) {
@@ -69,27 +71,73 @@ class AdsController extends Controller{
         //         "data"=>$ads
         //     ]);
         // }
-        
-        try{
-            $ads = Ads::create($request->all());
-            return $ads;
-        }
-        catch (\Exception $e){
-            $error_code = $e->errorInfo[1];
-            if($error_code == 1062){
-                var_dump($e);
-                // self::deleteAds($ads['id']);
-                return 'We have a duplicate entry problem';
+
+        //cek waktu data terakhir diinput
+        $lastData = Ads::latest()->first();
+        // return $lastData;
+        $lastInput = $lastData['created_at'];
+        $lastInput = strtotime($lastInput);
+        // echo($lastNginput);
+        //cek waktu saat nginput
+            //get datetime php
+        $now = date('Y-m-d H:i:s');
+        $now = strtotime($now);
+        // echo $now;
+
+        // return response()->json([
+        //     'last input'=>$lastInput,
+        //     'now'=>$now
+        //     ]);
+        //if > 1 minutes then
+        ////create
+        if($lastInput > $now - 60){
+            return response()->json(['status'=>'Forbidden','messages'=>'gak bisa nginput sebelum 1 menit'], 403);
+        }else{
+            // echo "bisa nginput";
+            try{
+                $ads = Ads::create($request->all());
+                return response()->json([
+                'status'=>'Succes',
+                'messages'=>'bisa nginput'
+                ], 200);
             }
+            catch (\Exception $e){
+                $error_code = $e->errorInfo[1];
+                if($error_code == 1062){
+                    // self::deleteAds($ads['id']);
+                    return response()->json([
+                'status'=>'Forbidden',
+                'messages'=>'judul sudah ada'
+                ], 403);
+                }
+            }
+            
         }
+
+        //else
+        ////response 403 (forbidden)
+
+
+
+        
     }
 
     public function deleteAds($id){
         $ads  = Ads::find($id);
+        
+        if($ads->view_counter > 0){
+            return response()->json([
+                'status'=>'Forbidden',
+                'message'=>'Iklan sudah ada View Counter-nya'
+                ],403);
+        }else{
+            $ads->delete();
+            return response()->json([
+                'status'=>'Success',
+                'message'=>'Hapus iklan berhasil'
+                ],200);
+        }
  
-        $ads->delete();
- 
-        return response()->json('success');
     }
  
     public function updateAds(Request $request,$id){
@@ -107,5 +155,37 @@ class AdsController extends Controller{
     //Pakde
 
     //Pakpo
+    public function approveAds(Request $request, $id){
+        $ads  = Ads::find($id);
+
+        $ads->status = $request->input('status');
+        if($ads->status == 0){
+            return response()->json([
+                'status'=>'Forbidden',
+                'message'=>'Status cannot unapproved again'
+                ], 403);
+        }
+            $ads->save();
+            return response()->json([
+                'status'=>'Success',
+                'message'=>'Status Approved'
+                ], 200);
+    }
+
+    public function updateVcAds(Request $request, $id){
+        $ads  = Ads::find($id);
+
+        $ads->view_counter = $request->input([
+            'status'=>'Forbidden',
+            'message'=>'view_counter'
+            ], 403);
+
+        $ads->save();
+
+        return response()->json([
+            'status'=>'Success',
+            'message'=>'View count has been updated'
+            ], 200);
+    }
  
 }
