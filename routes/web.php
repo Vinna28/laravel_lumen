@@ -19,7 +19,7 @@ $router->get('api/ads','AdsController@index');
  
 $router->get('api/ads/{id}','AdsController@getAds');
 
-$router->get('api/ads/s/pending','AdsController@getPendingAds');
+$router->get('api/ads/status/pending','AdsController@getPendingAds');
  
 $router->post('api/ads','AdsController@saveAds');
  
@@ -28,8 +28,17 @@ $router->put('api/ads/{id}','AdsController@updateAds');
 $router->delete('api/ads/{id}','AdsController@deleteAds');
 
 //Pakde
+// jalur dibuat beda level dgn menambah /manage
+$router->get('api/ads/manage/custom', 'AdsController@getCustomAds');
+$router->get('api/ads/manage/popular', 'AdsController@getPopularAds');
 
+//Pakpo
+
+
+<<<<<<< HEAD
 //Pakpo
 $router->put('api/ads/approve/{id}','AdsController@approveAds');
 
 $router->put('api/ads/vc/{id}', 'AdsController@updateVcAds');
+=======
+>>>>>>> 9117f8d9a7a89c1a597515166182b8cceecb4844

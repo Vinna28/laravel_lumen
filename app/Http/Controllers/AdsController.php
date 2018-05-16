@@ -15,33 +15,40 @@ class AdsController extends Controller{
         $adsapis  = Ads::all();
 
         return response()->json([
-            'results'=>$adsapis,
-            'message'=>'List all ads'
+            'result'=>$adsapis
         ]);
  
     }
  
     public function getAds($id){
         
-
-        //ini dikerjakan Pakde
         $ads  = Ads::find($id);
-        $ads->view_counter = $ads['view_counter']+1;
- 
-        $ads->save();
-            //tesss
-        if ($ads) {
+
+        if ($ads==null) {
             # code...
             return response()->json([
-                "data"=>$ads
-                ]); 
+                'status'=>404,
+                'message'=>'Forbidden, id is not exist'
+            ]);
+
+        } else {
+            # code...
+            $ads->view_counter = $ads['view_counter']+1;
+            $ads->save();
+
+            return response()->json([
+                'result'=>$ads
+            ]); 
         }
     }
 
     public function getPendingAds(){
 
         $ads = Ads::where('status', 0)->get();
-        return response()->json($ads);
+        
+        return response()->json([
+            'result'=>$ads
+        ]);
     }
  
     public function saveAds(Request $request){
@@ -71,6 +78,7 @@ class AdsController extends Controller{
         //         "data"=>$ads
         //     ]);
         // }
+
 
         //cek waktu data terakhir diinput
         $lastData = Ads::latest()->first();
@@ -110,16 +118,8 @@ class AdsController extends Controller{
                 'messages'=>'judul sudah ada'
                 ], 403);
                 }
-            }
-            
-        }
-
-        //else
-        ////response 403 (forbidden)
-
-
-
-        
+            }  
+        }  
     }
 
     public function deleteAds($id){
@@ -137,22 +137,67 @@ class AdsController extends Controller{
                 'message'=>'Hapus iklan berhasil'
                 ],200);
         }
- 
     }
  
     public function updateAds(Request $request,$id){
         $ads  = Ads::find($id);
+
+        if ($ads==null) {
+            # code...
+            return response()->json([
+                'status'=>404,
+                'message'=>'Forbidden, id is not exist'
+            ]);
+
+        } else {
+            # code...
+            $ads->title = $request->input('title');
+            $ads->content = $request->input('content');
+            $ads->category = $request->input('category');
+     
+            $ads->save();
+     
+            return response()->json([
+                'status'=>200,
+                'message'=>'Success',
+                'result'=>$ads
+            ]);
+        } 
  
-        $ads->title = $request->input('title');
-        $ads->content = $request->input('content');
-        $ads->category = $request->input('category');
- 
-        $ads->save();
- 
-        return response()->json($ads);
+
+        
     }
 
     //Pakde
+    // Get costum request 
+    public function getCustomAds(Request $request) {
+
+        $create_at = $request->input('date');
+        $category = $request->input('category');
+        $view_counter = $request->input('view_counter');
+
+
+        $ads = Ads::query();
+        if (!is_null($category)) {
+            $ads = $ads->where('category', $category);
+        }
+        if (!is_null($view_counter)) {
+            $ads = $ads->where('view_counter', $view_counter);
+        }
+        if (!is_null($create_at)) {
+            $ads = $ads->whereRaw('date(created_at) = ?', [$create_at]);
+        }     
+
+        return response()->json(['result'=>$ads->get()]);
+    }
+
+    // get popular
+    public function getPopularAds() {
+
+        $ads = Ads::orderByDesc('view_counter')->take(5)->get();
+
+        return response()->json(["result"=>$ads]);
+    }
 
     //Pakpo
     public function approveAds(Request $request, $id){
