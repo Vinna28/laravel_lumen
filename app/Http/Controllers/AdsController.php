@@ -17,7 +17,6 @@ class AdsController extends Controller{
         return response()->json([
             'result'=>$adsapis
         ]);
- 
     }
  
     public function getAds($id){
@@ -27,9 +26,9 @@ class AdsController extends Controller{
         if ($ads==null) {
             # code...
             return response()->json([
-                'status'=>404,
-                'message'=>'Forbidden, id is not exist'
-            ]);
+                'status'=>'Forbidden',
+                'message'=>'Id is not exist'
+                ], 403);
 
         } else {
             # code...
@@ -38,7 +37,7 @@ class AdsController extends Controller{
 
             return response()->json([
                 'result'=>$ads
-            ]); 
+            ], 200); 
         }
     }
 
@@ -55,9 +54,6 @@ class AdsController extends Controller{
  
         $input = $request->all();
         // var_dump($input['title']);
-
-
-
         // // var_dump(count($ads));
         // //if ads name exist, dont save and response 403
         // if ($ads) {
@@ -79,34 +75,27 @@ class AdsController extends Controller{
         //     ]);
         // }
 
-
         //cek waktu data terakhir diinput
         $lastData = Ads::latest()->first();
-        // return $lastData;
         $lastInput = $lastData['created_at'];
         $lastInput = strtotime($lastInput);
-        // echo($lastNginput);
         //cek waktu saat nginput
-            //get datetime php
         $now = date('Y-m-d H:i:s');
         $now = strtotime($now);
-        // echo $now;
 
-        // return response()->json([
-        //     'last input'=>$lastInput,
-        //     'now'=>$now
-        //     ]);
         //if > 1 minutes then
-        ////create
         if($lastInput > $now - 60){
-            return response()->json(['status'=>'Forbidden','messages'=>'gak bisa nginput sebelum 1 menit'], 403);
+            return response()->json([
+                'status'=>'Forbidden',
+                'message'=>'Sorry, you cannot input Ads before 1 minute'
+                ], 403);
         }else{
-            // echo "bisa nginput";
+            // code bisa nginput
             try{
                 $ads = Ads::create($request->all());
                 return response()->json([
-                'status'=>'Succes',
-                'messages'=>'bisa nginput'
+                'status'=>'Success',
+                'message'=>'Input success'
                 ], 200);
             }
             catch (\Exception $e){
@@ -115,7 +104,7 @@ class AdsController extends Controller{
                     // self::deleteAds($ads['id']);
                     return response()->json([
                 'status'=>'Forbidden',
-                'messages'=>'judul sudah ada'
+                'message'=>'Title exist'
                 ], 403);
                 }
             }  
@@ -124,17 +113,17 @@ class AdsController extends Controller{
 
     public function deleteAds($id){
         $ads  = Ads::find($id);
-        
+        //code filter hapus bila tidak ada view counternya
         if($ads->view_counter > 0){
             return response()->json([
                 'status'=>'Forbidden',
-                'message'=>'Iklan sudah ada View Counter-nya'
+                'message'=>'Sorry, Ads cannot delete'
                 ],403);
         }else{
             $ads->delete();
             return response()->json([
                 'status'=>'Success',
-                'message'=>'Hapus iklan berhasil'
+                'message'=>'Ads has been deleted'
                 ],200);
         }
     }
@@ -145,9 +134,9 @@ class AdsController extends Controller{
         if ($ads==null) {
             # code...
             return response()->json([
-                'status'=>404,
-                'message'=>'Forbidden, id is not exist'
-            ]);
+                'status'=>'Forbidden',
+                'message'=>'Id is not exist'
+            ], 403);
 
         } else {
             # code...
@@ -158,14 +147,11 @@ class AdsController extends Controller{
             $ads->save();
      
             return response()->json([
-                'status'=>200,
-                'message'=>'Success',
+                'status'=>'Success',
+                'message'=> 'Ads updated',
                 'result'=>$ads
-            ]);
-        } 
- 
-
-        
+            ], 200);
+        }     
     }
 
     //Pakde
@@ -196,7 +182,7 @@ class AdsController extends Controller{
 
         $ads = Ads::orderByDesc('view_counter')->take(5)->get();
 
-        return response()->json(["result"=>$ads]);
+        return response()->json(['result'=>$ads]);
     }
 
     //Pakpo
@@ -222,15 +208,14 @@ class AdsController extends Controller{
 
         $ads->view_counter = $request->input([
             'status'=>'Forbidden',
-            'message'=>'view_counter'
+            'message'=>'View counter not updated'
             ], 403);
 
         $ads->save();
 
         return response()->json([
             'status'=>'Success',
-            'message'=>'View count has been updated'
+            'message'=>'View counter has been updated'
             ], 200);
     }
- 
 }
