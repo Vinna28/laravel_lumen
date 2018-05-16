@@ -15,33 +15,40 @@ class AdsController extends Controller{
         $adsapis  = Ads::all();
 
         return response()->json([
-            'results'=>$adsapis,
-            'message'=>'List all ads'
+            'result'=>$adsapis
         ]);
  
     }
  
     public function getAds($id){
         
-
-        //ini dikerjakan Pakde
         $ads  = Ads::find($id);
-        $ads->view_counter = $ads['view_counter']+1;
- 
-        $ads->save();
-            //tesss
-        if ($ads) {
+
+        if ($ads==null) {
             # code...
             return response()->json([
-                "data"=>$ads
-                ]); 
+                'status'=>404,
+                'message'=>'Forbidden, id is not exist'
+            ]);
+
+        } else {
+            # code...
+            $ads->view_counter = $ads['view_counter']+1;
+            $ads->save();
+
+            return response()->json([
+                'result'=>$ads
+            ]); 
         }
     }
 
     public function getPendingAds(){
 
         $ads = Ads::where('status', 0)->get();
-        return response()->json($ads);
+        
+        return response()->json([
+            'result'=>$ads
+        ]);
     }
  
     public function saveAds(Request $request){
@@ -72,14 +79,19 @@ class AdsController extends Controller{
         
         try{
             $ads = Ads::create($request->all());
-            return $ads;
+            return response()->json([
+                'result'=>$ads
+            ]);
         }
         catch (\Exception $e){
             $error_code = $e->errorInfo[1];
             if($error_code == 1062){
-                var_dump($e);
+                //var_dump($e);
                 // self::deleteAds($ads['id']);
-                return 'We have a duplicate entry problem';
+                return response()->json([
+                    'status'=>500,
+                    'message'=>'Error! We have a duplicate entry problem'
+                ]);
             }
         }
     }
@@ -89,19 +101,37 @@ class AdsController extends Controller{
  
         $ads->delete();
  
-        return response()->json('success');
+        return response()->json([
+            'status'=>200,
+            'message'=>'Success! Ads deleted'
+        ]);
     }
  
     public function updateAds(Request $request,$id){
         $ads  = Ads::find($id);
+
+        if ($ads==null) {
+            # code...
+            return response()->json([
+                'status'=>404,
+                'message'=>'Forbidden, id is not exist'
+            ]);
+
+        } else {
+            # code...
+            $ads->title = $request->input('title');
+            $ads->content = $request->input('content');
+            $ads->category = $request->input('category');
+     
+            $ads->save();
+     
+            return response()->json([
+                'status'=>200,
+                'message'=>'Success',
+                'result'=>$ads
+            ]);
+        } 
  
-        $ads->title = $request->input('title');
-        $ads->content = $request->input('content');
-        $ads->category = $request->input('category');
- 
-        $ads->save();
- 
-        return response()->json($ads);
     }
 
     //Pakde
