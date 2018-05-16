@@ -132,9 +132,40 @@ class AdsController extends Controller{
             ]);
         } 
  
+
+        
     }
 
     //Pakde
+    // Get costum request 
+    public function getCustomAds(Request $request) {
+
+        $create_at = $request->input('date');
+        $category = $request->input('category');
+        $view_counter = $request->input('view_counter');
+
+
+        $ads = Ads::query();
+        if (!is_null($category)) {
+            $ads = $ads->where('category', $category);
+        }
+        if (!is_null($view_counter)) {
+            $ads = $ads->where('view_counter', $view_counter);
+        }
+        if (!is_null($create_at)) {
+            $ads = $ads->whereRaw('date(created_at) = ?', [$create_at]);
+        }     
+
+        return response()->json(['result'=>$ads->get()]);
+    }
+
+    // get popular
+    public function getPopularAds() {
+
+        $ads = Ads::orderByDesc('view_counter')->take(5)->get();
+
+        return response()->json(["result"=>$ads]);
+    }
 
     //Pakpo
  

@@ -28,6 +28,9 @@ $router->put('api/ads/{id}','AdsController@updateAds');
 $router->delete('api/ads/{id}','AdsController@deleteAds');
 
 //Pakde
+// jalur dibuat beda level dgn menambah /manage
+$router->get('api/ads/manage/custom', 'AdsController@getCustomAds');
+$router->get('api/ads/manage/popular', 'AdsController@getPopularAds');
 
 //Pakpo
 
